@@ -1,0 +1,678 @@
+ <!-- header meta, it's object is define in  AppServerProvider -->
+ @if (isset($settings->title))
+     @include('dashboard.common.header', ['tab_title' => 'Settings - ' . $settings->title])
+ @else
+@include('dashboard.common.header', ['tab_title' => 'Settings - AllBetter'])
+@endif
+@include('dashboard.common.nav')
+@include('dashboard.common.menu', ['title' => 'Settings'])
+<!--Centeral-Content-->
+
+<!-- Page content -->
+<div class="content">
+    @if (Session::has('success'))
+        <div class="alert alert-success">{{ Session::get('success') }}</div>
+    @endif
+    @if (Session::has('fail'))
+        <div class="alert alert-danger">{{ Session::get('fail') }}</div>
+    @endif
+    <!-- Basic layout -->
+
+    <div class="content">
+
+        <!-- Legend -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Settings</h5>
+            </div>
+            {{-- settings --}}
+            @if (!isset($settings))
+                <div class="card-body border-top">
+                    <form action="{{ route('setting.store') }}" method="post" enctype="multipart/form-data">
+                        @csrf
+                        <fieldset class="mb-3">
+                            <div class="row">
+                                <legend class="fs-base fw-bold border-bottom pb-2 mb-3">Logo Setting</legend>
+                                <!-- website logo image section -->
+                                <div class="col-md-6 mb-3">
+                                    <div class="mb-3">
+                                        <!-- <label class="form-label">website Logo:</label> -->
+                                        <div class="sidebar-section-body text-center">
+                                            <div class="card-img-actions d-inline-block mb-3">
+
+                                                @if (isset($settings->website_logo))
+                                                    <img id="website_img_prv" name="website_logo"
+                                                        class="img-fluid rounded-circle website_img_prv"
+                                                        src="image/website_logo/{{ $settings->website_logo }}"
+                                                        width="100" height="100" alt="">
+                                                @else
+                                                    <img id="website_img_prv" name="website_logo"
+                                                        class="img-fluid rounded-circle website_img_prv"
+                                                        src="{{ asset('images/allbetter.png') }}" width="100"
+                                                        height="100" alt="">
+                                                @endif
+
+                                                <div class="card-img-actions-overlay card-img rounded-circle">
+                                                    <label for="website_logo"
+                                                        class="btn btn-outline-white btn-icon rounded-pill">
+                                                        <i class="ph-pencil"></i>
+                                                        <input type="file" id="website_logo" name="website_logo"
+                                                            multiple class="d-none website_logo">
+                                                        <span id="mgs_ta"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <h6 class="mb-0">website Logo</h6>
+                                            <!-- <span class="text-muted">54545</span> -->
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+                                <script type="text/javascript">
+                                    $('#website_logo').on('change', function(ev) {
+                                        var filedata = this.files[0];
+                                        var imgtype = filedata.type;
+                                        var match = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg', 'image/JPEG', 'image/JPG',
+                                            'image/PNG'
+                                        ];
+                                        var filesize = filedata.size;
+                                        var filesizeMB = (filesize / (1024 * 1024)).toFixed(2);
+                                        if (filesizeMB <= 1) {
+                                            if (match.indexOf(imgtype) === -1) {
+                                                swal("Error!", "Plz select a valid type image only jpg jpeg png allowed !", "error");
+                                            } else {
+                                                $('#website_img_prv').empty();
+                                                //---image preview
+                                                var reader = new FileReader();
+                                                reader.onload = function(ev) {
+                                                    $('#website_img_prv').attr('src', ev.target.result).css('width', '100px').css('height',
+                                                        '100px');
+                                                }
+                                                reader.readAsDataURL(this.files[0]);
+                                                // preview end
+
+                                                //upload
+                                                var postData = new FormData();
+                                                postData.append('file', this.files[0]);
+                                                var url = "{{ url('website-logo') }}";
+                                                $.ajax({
+                                                    headers: {
+                                                        'X-CSRF-Token': $('meta[name=csrf-token]').attr('content')
+                                                    },
+                                                    async: true,
+                                                    type: "post",
+                                                    contentType: false,
+                                                    url: url,
+                                                    data: postData,
+                                                    processData: false,
+                                                    success: function(data) {
+                                                        console.log(data);
+                                                        if (data.success == true) {
+                                                            swal("Sucess!", "Profile Image Change Successfully!", "success");
+                                                        }
+                                                    },
+                                                    error: function(data) {
+                                                        if (data.success == false) {
+                                                            swal("Error!", "Sorry Profile Image Not Changed !", "error");
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        } else {
+                                            swal("Error!", "Profile Image Must be Less than 1MB!", "error");
+                                        }
+                                    });
+                                </script>
+                                <!-- invoice settings -->
+                                <div class="col-md-6 mb-3">
+                                    {{-- <input type="file" class="form-control"> --}}
+                                    <div class="mb-3">
+                                        <!-- <label class="form-label"> Invoice Logo:</label> -->
+                                        <div class="sidebar-section-body text-center">
+                                            <div class="card-img-actions d-inline-block mb-3">
+
+                                                @if (isset($settings->invoice_logo))
+                                                    <img id="img_prv" name="invoice_logo"
+                                                        class="img-fluid rounded-circle"
+                                                        src="image/invoice_logo/{{ $settings->invoice_logo }}"
+                                                        width="100" height="100" alt="">
+                                                @else
+                                                    {{-- if image is not set --}}
+                                                    <img id="img_prv" name="invoice_logo"
+                                                        class="img-fluid rounded-circle"
+                                                        src="{{ asset('images/allbetter.png') }}" width="100"
+                                                        height="100" alt="">
+                                                @endif
+                                                <div class="card-img-actions-overlay card-img rounded-circle">
+                                                    <label for="invoice_logo"
+                                                        class="btn btn-outline-white btn-icon rounded-pill">
+                                                        <i class="ph-pencil"></i>
+                                                        <input type="file" id="invoice_logo" name="invoice_logo"
+                                                            multiple class="d-none">
+                                                        <span id="mgs_ta"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <h6 class="mb-0">Invoice Logo</h6>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </fieldset>
+
+                        <script type="text/javascript">
+                            $('#invoice_logo').on('change', function(ev) {
+                                var fileuploaddata = this.files[0];
+                                var imagtype = fileuploaddata.type;
+                                var matchimg = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg', 'image/JPEG', 'image/JPG',
+                                    'image/PNG'
+                                ];
+                                var imgfilesize = fileuploaddata.size;
+                                var imgfilesizeMB = (imgfilesize / (1024 * 1024)).toFixed(2);
+                                if (imgfilesizeMB <= 1) {
+                                    if (matchimg.indexOf(imagtype) === -1) {
+                                        swal("Error!", "Plz select a valid type image only jpg jpeg png allowed !", "error");
+                                    } else {
+                                        $('#img_prv').empty();
+                                        //---image preview
+                                        var imgreader = new FileReader();
+                                        imgreader.onload = function(ev) {
+                                            $('#img_prv').attr('src', ev.target.result).css('width', '100px').css('height',
+                                                '100px');
+                                        }
+                                        imgreader.readAsDataURL(this.files[0]);
+                                        // preview end
+                                        //upload
+
+                                        var postimgData = new FormData();
+                                        postimgData.append('file', this.files[0]);
+                                        // alert(postimgData)
+                                        var imageurl = "{{ url('invoice-logo') }}";
+                                        $.ajax({
+                                            headers: {
+                                                'X-CSRF-Token': $('meta[name=csrf-token]').attr('content')
+                                            },
+                                            async: true,
+                                            type: "post",
+                                            contentType: false,
+                                            url: imageurl,
+                                            data: postimgData,
+                                            processData: false,
+                                            success: function(data) {
+                                                console.log(data);
+                                                if (data.success == true) {
+                                                    swal("Sucess!", "Profile Image Change Successfully!", "success");
+                                                }
+                                            },
+                                            error: function(data) {
+                                                if (data.success == false) {
+                                                    swal("Error!", "Sorry Profile Image Not Changed !", "error");
+                                                }
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    swal("Error!", "Profile Image Must be Less than 1MB!", "error");
+                                }
+                            });
+                        </script>
+                        <!-- invoice logo upload section end -->
+
+                        <fieldset class="mb-3">
+                            <legend class="fs-base fw-bold border-bottom pb-2 mb-3">Address Settings</legend>
+
+                            <div class="mb-3">
+                                <label class="form-label">Address:</label>
+                                <input type="text" class="form-control" name="address" placeholder="Eugene Kopyov">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">City:</label>
+                                    <input type="text" class="form-control" name="city"
+                                        placeholder="Eugene Kopyov">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">State:</label>
+                                    <input type="text" class="form-control" name="state" placeholder="state">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Country:</label>
+                                    <input type="text" class="form-control" name="country" placeholder="country">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Phone:</label>
+                                    <input type="text" class="form-control" name="phone" placeholder="phone">
+                                </div>
+                            </div>
+
+                        </fieldset>
+
+                        <fieldset>
+                            <legend class="fs-base fw-bold border-bottom pb-2 mt-3">Invoice Settings</legend>
+
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Invoice Due Days:</label>
+                                    <input type="number" class="form-control" name="invoice_due_days"
+                                        placeholder="country">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Invoice Prefix:</label>
+                                    <input type="text" class="form-control" name="invoice_prefix"
+                                        placeholder="Invoice Prefi">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Auto Cancel Pending Invoice Days:</label>
+                                    <input type="number" class="form-control" name="invoice_auto_cancel_days"
+                                        placeholder="invoice_auto_cancel_days">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Pending Invoice Reminder Days:</label>
+                                    <input type="number" class="form-control" name="invoice_reminder_days"
+                                        placeholder="Pending Invoice Reminder Days">
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend class="fs-base fw-bold border-bottom pb-2 mt-3">Website Meta</legend>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Title :</label>
+                                    <input type="text" class="form-control" name="title" placeholder="title">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Footer:</label>
+                                    <input type="text" class="form-control" name="footer" placeholder="footer">
+                                </div>
+                            </div>
+                        </fieldset>
+                        
+                              <fieldset>
+                            <legend class="fs-base fw-bold border-bottom pb-2 mt-3">Mail Address</legend>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">mail Transport :</label>
+                                    <input type="text" class="form-control" name="mail_transport" value="{{ $settings->mail_transport ?? '' }}" placeholder="smtp.gmail.com">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Mail Host :</label>
+                                    <input type="text" class="form-control" name="mail_host" value="{{ $settings->mail_host ?? '' }}" placeholder="smtp.gmail.com">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Mail Port :</label>
+                                    <input type="text" class="form-control" name="mail_port" value="{{ $settings->mail_port ?? '' }}" placeholder="587">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Mail Username :</label>
+                                    <input type="text" class="form-control" name="mail_username" value="{{ $settings->mail_username ?? '' }}" placeholder="yourEmail@gmail.com">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Mail Password :</label>
+                                    <input type="text" class="form-control" name="mail_password" value="{{ $settings->mail_password ?? '' }}" placeholder="dwzbdwlxflmuxwer">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Mail Encryption :</label>
+                                    <input type="text" class="form-control" name="mail_encryption" value="{{ $settings->mail_encryption ?? '' }}" placeholder="tls">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Mail From :</label>
+                                    <input type="text" class="form-control" name="mail_from" value="{{ $settings->mail_from ?? '' }}" placeholder="yourEmail@gmail.com">
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend class="fs-base fw-bold border-bottom pb-2 mt-3">Website Codes</legend>
+
+                            <div class="mb-3">
+                                <label class="form-label">Header CSS Code:</label>
+                                <textarea rows="3" cols="3" class="form-control" name="header_css_code" placeholder="Header CSS Code"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Header Script Code:</label>
+                                <textarea rows="3" cols="3" class="form-control" name="header_script_code"
+                                    placeholder="Header Script Code"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Footer Script Code:</label>
+                                <textarea rows="3" cols="3" class="form-control" name="footer_script_code"
+                                    placeholder="Footer Script Cod"></textarea>
+                            </div>
+
+                        </fieldset>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">Create Setting<i
+                                    class="ph-paper-plane-tilt ms-2"></i></button>
+                        </div>
+                    </form>
+                </div>
+            @else
+                {{-- update --}}
+                <div class="card-body border-top">
+                    <form action="{{ route('setting.store') }}" method="post" enctype="multipart/form-data">
+                        @csrf
+                        <fieldset class="mb-3">
+                            <div class="row">
+                                <legend class="fs-base fw-bold border-bottom pb-2 mb-3">Logo Setting</legend>
+                                <div class="col-md-6 mb-3">
+                                    <div class="mb-3">
+                                        <!-- <label class="form-label">website Logo:</label> -->
+                                        <div class="sidebar-section-body text-center">
+                                            <div class="card-img-actions d-inline-block mb-3">
+
+                                                @if (isset($settings->website_logo))
+                                                    <img id="website_img_prv" name="website_logo"
+                                                        class="img-fluid rounded-circle website_img_prv"
+                                                        src="image/website_logo/{{ $settings->website_logo }}"
+                                                        width="100" height="100" alt="">
+                                                @else
+                                                    <img id="website_img_prv" name="website_logo"
+                                                        class="img-fluid rounded-circle website_img_prv"
+                                                        src="{{ asset('images/allbetter.png') }}" width="100"
+                                                        height="100" alt="">
+                                                @endif
+
+                                                <div class="card-img-actions-overlay card-img rounded-circle">
+                                                    <label for="website_logo"
+                                                        class="btn btn-outline-white btn-icon rounded-pill">
+                                                        <i class="ph-pencil"></i>
+                                                        <input type="file" id="website_logo" name="website_logo"
+                                                            multiple class="d-none website_logo">
+                                                        <span id="mgs_ta"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <h6 class="mb-0">website Logo</h6>
+                                            <!-- <span class="text-muted">54545</span> -->
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+                                <script type="text/javascript">
+                                    $('#website_logo').on('change', function(ev) {
+                                        var filedata = this.files[0];
+                                        var imgtype = filedata.type;
+                                        var match = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg', 'image/JPEG', 'image/JPG',
+                                            'image/PNG'
+                                        ];
+                                        var filesize = filedata.size;
+                                        var filesizeMB = (filesize / (1024 * 1024)).toFixed(2);
+                                        if (filesizeMB <= 1) {
+                                            if (match.indexOf(imgtype) === -1) {
+                                                swal("Error!", "Plz select a valid type image only jpg jpeg png allowed !", "error");
+                                            } else {
+                                                $('.website_img_prv').empty();
+                                                //---image preview
+                                                var reader = new FileReader();
+                                                reader.onload = function(ev) {
+                                                    $('.website_img_prv').attr('src', ev.target.result);
+                                                }
+                                                reader.readAsDataURL(this.files[0]);
+                                                // preview end
+
+                                                //upload
+                                                var postData = new FormData();
+                                                postData.append('file', this.files[0]);
+                                                var url = "{{ url('website-logo') }}";
+                                                $.ajax({
+                                                    headers: {
+                                                        'X-CSRF-Token': $('meta[name=csrf-token]').attr('content')
+                                                    },
+                                                    async: true,
+                                                    type: "post",
+                                                    contentType: false,
+                                                    url: url,
+                                                    data: postData,
+                                                    processData: false,
+                                                    success: function(data) {
+                                                        console.log(data);
+                                                        if (data.success == true) {
+                                                            swal("Sucess!", "Profile Image Change Successfully!", "success");
+                                                        } else {
+                                                            swal("Error!", "Sorry! you don't have premission!", "error");
+                                                        }
+                                                    },
+                                                    error: function(data) {
+                                                        if (data.success == false) {
+                                                            swal("Error!", "Sorry Profile Image Not Changed !", "error");
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        } else {
+                                            swal("Error!", "Profile Image Must be Less than 1MB!", "error");
+                                        }
+                                    });
+                                </script>
+
+                                <div class="col-md-6 mb-3">
+                                    {{-- <input type="file" class="form-control"> --}}
+                                    <div class="mb-3">
+                                        <!-- <label class="form-label"> Invoice Logo:</label> -->
+                                        <div class="sidebar-section-body text-center">
+                                            <div class="card-img-actions d-inline-block mb-3">
+
+                                                @if (isset($settings->invoice_logo))
+                                                    <img id="img_prv" name="invoice_logo"
+                                                        class="img-fluid rounded-circle"
+                                                        src="image/invoice_logo/{{ $settings->invoice_logo }}"
+                                                        width="100" height="100" alt="">
+                                                @else
+                                                    {{-- if image is not set --}}
+                                                    <img id="img_prv" name="invoice_logo"
+                                                        class="img-fluid rounded-circle"
+                                                        src="{{ asset('images/allbetter.png') }}" width="100"
+                                                        height="100" alt="">
+                                                @endif
+                                                <div class="card-img-actions-overlay card-img rounded-circle">
+                                                    <label for="invoice_logo"
+                                                        class="btn btn-outline-white btn-icon rounded-pill">
+                                                        <i class="ph-pencil"></i>
+                                                        <input type="file" id="invoice_logo" name="invoice_logo"
+                                                            multiple class="d-none">
+                                                        <span id="mgs_ta"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <h6 class="mb-0">Invoice Logo</h6>
+                                        </div>
+                                        <!-- <input type="file" class="form-control" name="invoice_logo"> -->
+                                        <!-- <div class="form-text text-muted">Accepted formats: gif, png, jpg. Max file
+                                        size 2Mb
+                                    </div> -->
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <script type="text/javascript">
+                            $('#invoice_logo').on('change', function(ev) {
+                                var fileuploaddata = this.files[0];
+                                var imagtype = fileuploaddata.type;
+                                var matchimg = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg', 'image/JPEG', 'image/JPG',
+                                    'image/PNG'
+                                ];
+                                var imgfilesize = fileuploaddata.size;
+                                var imgfilesizeMB = (imgfilesize / (1024 * 1024)).toFixed(2);
+                                if (imgfilesizeMB <= 1) {
+                                    if (matchimg.indexOf(imagtype) === -1) {
+                                        swal("Error!", "Plz select a valid type image only jpg jpeg png allowed !", "error");
+                                    } else {
+                                        $('#img_prv').empty();
+                                        //---image preview
+                                        var imgreader = new FileReader();
+                                        imgreader.onload = function(ev) {
+                                            $('#img_prv').attr('src', ev.target.result).css('width', '100px');
+                                        }
+                                        imgreader.readAsDataURL(this.files[0]);
+                                        // preview end
+                                        //upload
+
+                                        var postimgData = new FormData();
+                                        postimgData.append('file', this.files[0]);
+                                        // alert(postimgData)
+                                        var imageurl = "{{ url('invoice-logo') }}";
+                                        $.ajax({
+                                            headers: {
+                                                'X-CSRF-Token': $('meta[name=csrf-token]').attr('content')
+                                            },
+                                            async: true,
+                                            type: "post",
+                                            contentType: false,
+                                            url: imageurl,
+                                            data: postimgData,
+                                            processData: false,
+                                            success: function(data) {
+                                                console.log(data);
+                                                if (data.success == true) {
+                                                    swal("Sucess!", "Profile Image Change Successfully!", "success");
+                                                } else {
+                                                    swal("Error!", "Sorry! you don't have premission!", "error");
+                                                }
+                                            },
+                                            error: function(data) {
+                                                if (data.success == false) {
+                                                    swal("Error!", "Sorry Profile Image Not Changed !", "error");
+                                                }
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    swal("Error!", "Profile Image Must be Less than 1MB!", "error");
+                                }
+                            });
+                        </script>
+
+                        <fieldset class="mb-3">
+                            <legend class="fs-base fw-bold border-bottom pb-2 mb-3">Address Settings</legend>
+
+                            <div class="mb-3">
+                                <label class="form-label">Address:</label>
+                                <input type="text" class="form-control" name="address"
+                                    value="{{ $settings->address }}" placeholder="Eugene Kopyov">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">City:</label>
+                                    <input type="text" class="form-control" name="city"
+                                        value="{{ $settings->city }}" placeholder="Eugene Kopyov">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">State:</label>
+                                    <input type="text" class="form-control" name="state"
+                                        value="{{ $settings->state }}" placeholder="state">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Country:</label>
+                                    <input type="text" class="form-control" name="country"
+                                        value="{{ $settings->country }}" placeholder="country">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Phone:</label>
+                                    <input type="text" class="form-control" name="phone"
+                                        value="{{ $settings->phone }}" placeholder="phone">
+                                </div>
+                            </div>
+
+                        </fieldset>
+
+                        <fieldset>
+                            <legend class="fs-base fw-bold border-bottom pb-2 mt-3">Invoice Settings</legend>
+
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Invoice Prefix:</label>
+                                    <input type="text" class="form-control" name="invoice_prefix"
+                                        value="{{ $settings->invoice_prefix }}" placeholder="Invoice Prefi">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Invoice Due Days:</label>
+                                    <input type="number" class="form-control" name="invoice_due_days"
+                                        value="{{ $settings->invoice_due_days }}" placeholder="country">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Auto Cancel Pending Invoice Days:</label>
+                                    <input type="number" class="form-control" name="invoice_auto_cancel_days"
+                                        value="{{ $settings->invoice_auto_cancel_days }}"
+                                        placeholder="invoice_auto_cancel_days">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Pending Invoice Reminder Days:</label>
+                                    <input type="number" class="form-control" name="invoice_reminder_days"
+                                        value="{{ $settings->invoice_reminder_days }}"
+                                        placeholder="Pending Invoice Reminder Days">
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend class="fs-base fw-bold border-bottom pb-2 mt-3">Website Meta</legend>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Title :</label>
+                                    <input type="text" class="form-control" name="title"
+                                        value="{{ $settings->title }}" placeholder="title">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Footer:</label>
+                                    <input type="text" class="form-control" name="footer"
+                                        value="{{ $settings->footer }}" placeholder="footer">
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend class="fs-base fw-bold border-bottom pb-2 mt-3">Website Codes</legend>
+
+                            <div class="mb-3">
+                                <label class="form-label">Header CSS Code:</label>
+                                <textarea rows="3" cols="3" class="form-control" name="header_css_code" placeholder="Header CSS Code">{{ $settings->header_css_code }}</textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Header Script Code:</label>
+                                <textarea rows="3" cols="3" class="form-control" name="header_script_code"
+                                    placeholder="Header Script Code">{{ $settings->header_script_code }}</textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Footer Script Code:</label>
+                                <textarea rows="3" cols="3" class="form-control" name="footer_script_code"
+                                    placeholder="Footer Script Cod">{{ $settings->footer_script_code }}</textarea>
+                            </div>
+
+                        </fieldset>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">Update Settings<i
+                                    class="ph-paper-plane-tilt ms-2"></i></button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /update -->
+            @endif
+        </div>
+
+    </div>
+</div>
+
+@include('dashboard.common.footer')

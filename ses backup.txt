@@ -1,0 +1,78 @@
+Skip to content
+Search or jump to…
+Pull requests
+Issues
+Codespaces
+Marketplace
+Explore
+ 
+@Muhammad-ijazCRT 
+sanishan
+/
+appbackend
+Private
+Fork your own copy of sanishan/appbackend
+Code
+Issues
+Pull requests
+1
+Actions
+Projects
+Security
+Insights
+appbackend/database/migrations/2023_03_18_211458_add_ses_endpoint_to_hosted_servers.php /
+@sanishan
+sanishan added new column in hosted-server
+Latest commit 194b9d4 last week
+ History
+ 1 contributor
+33 lines (30 sloc)  646 Bytes
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('hosted_servers', function (Blueprint $table) {
+            //
+            $table->string('ses_endpoint')->nullable();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('hosted_servers', function (Blueprint $table) {
+            //
+        });
+    }
+};
+Footer
+© 2023 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Docs
+Contact GitHub
+Pricing
+API
+Training
+Blog
+About
+appbackend/2023_03_18_211458_add_ses_endpoint_to_hosted_servers.php at main · sanishan/appbackend
